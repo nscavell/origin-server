@@ -4,7 +4,7 @@
 
 Summary:       Provides Vertx.x support
 Name:          openshift-origin-cartridge-vertx
-Version: 1.0.0
+Version: 0.1.1
 Release:       1%{?dist}
 Group:         Development/Languages
 License:       ASL 2.0
@@ -28,11 +28,10 @@ Provides Vertx.x support to OpenShift. (Cartridge Format V2)
 
 %build
 %__rm %{name}.spec
+# Remove docs
 %__rm -rf %{vertx_name}-%{vertx_version}/api-docs
-
-# TODO: Change this to use vertx_version when 2.1 is out, as you can't have 2.1M3 as a version number in OpenShift
-%__mkdir -p versions/2.1
-%__mv %{vertx_name}-%{vertx_version} versions/2.1/dist
+# Copy runtime to usr dir of cartridge
+%__mv %{vertx_name}-%{vertx_version} usr/
 
 %install
 %__mkdir -p %{buildroot}%{cartridgedir}
@@ -47,5 +46,8 @@ Provides Vertx.x support to OpenShift. (Cartridge Format V2)
 %doc %{cartridgedir}/LICENSE
 
 %changelog
-* Mon Jan 6 2014 Nick Scavelli <nscavell@redhat.com> 1.0.0-1
+* Tue Jan 21 2014 Nick Scavelli <nscavell@redhat.com> 0.1.1-1
+- Add usr directory to store vert.x runtime so it can be symlinked
+
+* Mon Jan 6 2014 Nick Scavelli <nscavell@redhat.com> 0.1.0-1
 - Initial RPM spec

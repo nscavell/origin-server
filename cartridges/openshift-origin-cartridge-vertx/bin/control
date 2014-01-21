@@ -5,7 +5,8 @@ source $OPENSHIFT_CARTRIDGE_SDK_BASH
 version=${OPENSHIFT_VERTX_VERSION}
 logf="$OPENSHIFT_VERTX_LOG_DIR/vertx.log"
 
-VERTX_HOME=${OPENSHIFT_VERTX_DIR}/versions/$version/dist
+# TODO: Replace 2.1M3 with $version when 2.1 is released
+VERTX_HOME=${OPENSHIFT_VERTX_DIR}/usr/vert.x-2.1M3
 VERTX_PID_FILE=${OPENSHIFT_HOMEDIR}/app-root/runtime/vertx.pid
 
 # Check if the vertx process is running
@@ -73,11 +74,11 @@ function stop() {
 function setup_hazelcast {
   # TODO: Figure out a better way to do this
   if [ -f "$OPENSHIFT_VERTX_DIR/versions/shared/conf/cluster.xml" ]; then
-    cp $OPENSHIFT_VERTX_DIR/versions/shared/conf/cluster.xml $VERTX_HOME/conf/
+    cp $OPENSHIFT_VERTX_DIR/versions/shared/conf/cluster.xml $OPENSHIFT_VERTX_DIR/conf/
   fi
 
   if [ -f "$OPENSHIFT_VERTX_DIR/versions/$version/conf/cluster.xml" ]; then
-    cp $OPENSHIFT_VERTX_DIR/versions/$version/conf/cluster.xml $VERTX_HOME/conf/
+    cp $OPENSHIFT_VERTX_DIR/versions/$version/conf/cluster.xml $OPENSHIFT_VERTX_DIR/conf/
   fi
   
   if [ -z "$OPENSHIFT_VERTX_HAZELCAST_CLUSTER" ]; then
@@ -97,7 +98,7 @@ function setup_hazelcast {
               -e "s/\${env.OPENSHIFT_VERTX_PROXY_IP}/${OPENSHIFT_VERTX_PROXY_IP}/g" \
               -e "s/\${env.OPENSHIFT_VERTX_IP}/${OPENSHIFT_VERTX_IP}/g" \
               -e "s/\${env.OPENSHIFT_VERTX_HAZELCAST_CLUSTER}/${hostnames}/g" \
-              $VERTX_HOME/conf/cluster.xml
+              ./conf/cluster.xml
   popd > /dev/null
 }
 
@@ -140,6 +141,9 @@ function start() {
 
   pushd $OPENSHIFT_REPO_DIR > /dev/null
 
+    export CLASSPATH=$OPENSHIFT_VERTX_DIR/conf
+    export VERTX_MODS=$OPENSHIFT_VERTX_DIR/sys_mods
+    export VERTX_JUL_CONFIG=$OPENSHIFT_VERTX_DIR/conf/logging.properties
     $VERTX_HOME/bin/vertx $vertx_run $vertx_options $vertx_cluster >> $logf 2>&1 &
     
     PROCESS_ID=$!

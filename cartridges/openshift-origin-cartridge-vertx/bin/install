@@ -5,22 +5,23 @@ case "$1" in
     version="$2"
 esac
 
-ln -s $OPENSHIFT_VERTX_DIR/versions/$version/dist/conf $OPENSHIFT_VERTX_DIR/conf
+# TODO: Replace 2.1M3 with $version when 2.1 is released
+cp -rL $OPENSHIFT_VERTX_DIR/usr/vert.x-2.1M3/conf $OPENSHIFT_VERTX_DIR
 
 shopt -s dotglob
-for dir in template conf; do
-    mkdir -p $OPENSHIFT_VERTX_DIR/$dir
+for dir in conf; do
+  mkdir -p $OPENSHIFT_VERTX_DIR/$dir
 
-    # Copy shared
-    if [ -d "$OPENSHIFT_VERTX_DIR/versions/shared/$dir" ]; then
-      cp -Lr $OPENSHIFT_VERTX_DIR/versions/shared/$dir/* $OPENSHIFT_VERTX_DIR/$dir
-    fi
-
-    # Copy version specific
-    if [ -d "$OPENSHIFT_VERTX_DIR/versions/$version/$dir" ]; then
-      cp -Lr $OPENSHIFT_VERTX_DIR/versions/$version/$dir/* $OPENSHIFT_VERTX_DIR/$dir
-    fi
-done
+  # Copy shared
+  if [ -d "$OPENSHIFT_VERTX_DIR/versions/shared/$dir" ]; then
+    cp -Lr $OPENSHIFT_VERTX_DIR/versions/shared/$dir/* $OPENSHIFT_VERTX_DIR/$dir
+  fi
+  
+  # Copy version specific
+  if [ -d "$OPENSHIFT_VERTX_DIR/versions/$version/$dir" ]; then
+    cp -Lr $OPENSHIFT_VERTX_DIR/versions/$version/$dir/* $OPENSHIFT_VERTX_DIR/$dir
+  fi
+done  
 
 if [ -z "$OPENSHIFT_VERTX_HAZELCAST_CLUSTER" ]; then
   OPENSHIFT_VERTX_HAZELCAST_CLUSTER="${OPENSHIFT_VERTX_IP}"
